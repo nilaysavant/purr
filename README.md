@@ -28,7 +28,11 @@ Options:
 
 ## Installation
 
-### Build from source
+### From Pre-compiled Binary
+
+- Check out the [Releases](https://github.com/nilaysavant/purr/releases) page.
+
+### Or Build from source
 
 - Clone this repository and open this dir in the terminal:
 
