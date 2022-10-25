@@ -152,6 +152,7 @@ fn mixed_multi_file_read() -> anyhow::Result<()> {
 }
 
 /// Test error on trying to read non-permitted file.
+#[ignore = "Issue: Needs to manually create a non-permitted file"]
 #[test]
 fn not_permitted_file_read() -> anyhow::Result<()> {
     // create temp test file(s)
