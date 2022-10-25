@@ -1,6 +1,7 @@
 # purr (`cat` in Rust)
 
 [![build](https://github.com/nilaysavant/purr/actions/workflows/build.yml/badge.svg)](https://github.com/nilaysavant/purr/actions/workflows/build.yml)
+[![tests](https://github.com/nilaysavant/purr/actions/workflows/tests.yml/badge.svg)](https://github.com/nilaysavant/purr/actions/workflows/tests.yml)
 
 My version of linux `cat` command, written in Rust.
 
