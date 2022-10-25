@@ -1,0 +1,95 @@
+# Inspired from:
+# - https://mateuscosta.me/rust-releases-with-github-actions
+# - https://github.com/actions-rs/cargo
+# - https://alican.codes/rust-github-actions/
+
+name: build
+
+on:
+  push:
+    branches:
+      - release
+
+jobs:
+  release:
+    name: Build and Release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: purr
+            asset_name: purr-linux-amd64
+            target: x86_64-unknown-linux-gnu
+            toolchain: stable
+            use_cross: false
+            args: --release --locked --target x86_64-unknown-linux-gnu
+
+          - os: windows-latest
+            artifact_name: purr.exe
+            asset_name: purr-win-amd64.exe
+            target: x86_64-pc-windows-gnu
+            toolchain: stable
+            use_cross: false
+            args: --release --locked --target x86_64-pc-windows-gnu
+
+          - os: macos-latest
+            artifact_name: purr
+            asset_name: purr-macos-amd64
+            target: x86_64-apple-darwin
+            toolchain: stable
+            use_cross: false
+            args: --release --locked --target x86_64-apple-darwin
+
+          # For Raspberry PI based systems
+          - os: ubuntu-latest
+            artifact_name: purr
+            asset_name: purr-linux-armv7
+            target: armv7-unknown-linux-gnueabihf
+            toolchain: stable
+            use_cross: true
+            args: --release --locked --target armv7-unknown-linux-gnueabihf
+
+          # For Raspberry PI Zero (ArmV6) based systems
+          - os: ubuntu-latest
+            artifact_name: purr
+            asset_name: purr-linux-armv6
+            target: arm-unknown-linux-gnueabihf
+            toolchain: stable
+            use_cross: true
+            args: --release --locked --target arm-unknown-linux-gnueabihf
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install and setup toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          target: ${{ matrix.target }}
+          override: true
+
+      - name: Build project with Cargo
+        uses: actions-rs/cargo@v1
+        with:
+          use-cross: ${{ matrix.use_cross }}
+          command: build
+          args: ${{ matrix.args }}
+
+      - name: Compress binary to zip file
+        if: ${{ matrix.target != 'x86_64-pc-windows-gnu' }} # if not windows
+        run: zip -j ${{ matrix.asset_name }}.zip target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
+
+      - name: Compress binary to zip file (Windows)
+        if: ${{ matrix.target == 'x86_64-pc-windows-gnu' }} # if windows
+        run: Compress-Archive target/${{ matrix.target }}/release/${{ matrix.artifact_name }} ${{ matrix.asset_name }}.zip #https://superuser.com/questions/201371/create-zip-folder-from-the-command-line-windows
+
+      - name: Upload binary to release
+        uses: svenstaro/upload-release-action@v1-release
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ${{ matrix.asset_name }}.zip
+          asset_name: ${{ matrix.asset_name }}.zip
+          tag: ${{ github.ref }}
+          overwrite: true
