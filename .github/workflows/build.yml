@@ -6,11 +6,9 @@
 name: build
 
 on:
-  release:
-    types: [published, created, edited, prereleased, released]
-#   push:
-#     branches:
-#       - master
+  push:
+    tags:
+      - '*'
 
 jobs:
   release:
