@@ -1,0 +1,42 @@
+# Inspired from:
+# - https://mateuscosta.me/rust-releases-with-github-actions
+# - https://github.com/actions-rs/cargo
+# - https://alican.codes/rust-github-actions/
+
+name: tests
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  tests:
+    name: Test Suite
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: purr
+            asset_name: purr-linux-amd64
+            target: x86_64-unknown-linux-gnu
+            toolchain: stable
+            use_cross: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install and setup toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          target: ${{ matrix.target }}
+          override: true
+
+      - name: Test project with Cargo
+        uses: actions-rs/cargo@v1
+        with:
+          use-cross: ${{ matrix.use_cross }}
+          command: test
+          args: ${{ matrix.args }}
